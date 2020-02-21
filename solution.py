@@ -85,7 +85,7 @@ def process(file_name):
         
         for index, line in enumerate(input_file):
             number_of_books_of_the_library, signup_process, ship_factor = [int(x) for x in line.split()]
-            books_in_library = sorted([int(x) for x in input_file.readline().split()], key=lambda book: books_scores[book])
+            books_in_library = sorted([int(x) for x in input_file.readline().split()], key=lambda book: books_scores[book], reverse=True)
             libraries[index] = (number_of_books_of_the_library, signup_process, ship_factor, books_in_library)
         
     solution = solve2(libraries, books_scores, days_for_scanning)
@@ -96,14 +96,14 @@ def process(file_name):
             output_file.write(str(key) + " " + str(len(solution[key])) + "\n")
             output_file.write(" ".join(str(value) for value in solution[key]) + "\n")
 
-# process("input\\a_example.txt") 
+process("input\\a_example.txt") 
 
-# process("input\\b_read_on.txt")
+process("input\\b_read_on.txt")
 
-# process("input\\c_incunabula.txt")
+process("input\\c_incunabula.txt")
 
-# process("input\\d_tough_choices.txt")
+process("input\\d_tough_choices.txt")
 
-# process("input\\e_so_many_books.txt")
+process("input\\e_so_many_books.txt")
 
-# process("input\\f_libraries_of_the_world.txt")
+process("input\\f_libraries_of_the_world.txt")
