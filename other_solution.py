@@ -1,4 +1,6 @@
 from recordtype import recordtype
+import glob
+import time
 
 
 LibraryInfo = recordtype("LibraryInfo", "number_of_books days_for_signup ship_factor books")
@@ -9,15 +11,32 @@ books_scores = {}
 checked_books = []
 
 
+def comparator(days_remaining, library_id):
+    score = calc_potential_score(days_remaining, libraries[library_id])
+
+    if not score:
+        inf = float("inf")
+
+        return inf, inf, inf
+
+    days_for_signup = libraries[library_id].days_for_signup / score
+    ship_factor = libraries[library_id].ship_factor / score
+    try:
+        best_books_score = -books_scores[libraries[library_id].books[0]]
+    except IndexError:
+        best_books_score = float("inf")
+    
+    return days_for_signup, ship_factor, best_books_score
+
+
 def sort_libraries(libraries_to_sort, days_remaining):
     for index in range(len(libraries_to_sort)):
-        books = [book for book in libraries[libraries_to_sort[index]].books if not checked_books[book]]
-        libraries[libraries_to_sort[index]].books = books
+        libraries[libraries_to_sort[index]].books = list(filter(lambda book_id: not checked_books[book_id], libraries[libraries_to_sort[index]].books))
 
-    return sorted(libraries_to_sort, key=lambda library_id: calc_potential_value(days_remaining, libraries[library_id]))[::-1]
+    return sorted(libraries_to_sort, key=lambda library_id: comparator(days_remaining, library_id))
 
 
-def calc_potential_value(days_for_scanning, library):
+def calc_potential_score(days_for_scanning, library):
     days_remaining = days_for_scanning - library.days_for_signup
     books = library.books
     ship_per_day = library.ship_factor
@@ -44,14 +63,14 @@ def send_books(library, days_remaining):
     global checked_books
 
     books = library.books
-    true_value = calc_potential_value(days_remaining, library)
+    true_score = calc_potential_score(days_remaining, library)
     sended_books = []
     index = 0
 
-    while true_value > 0:
+    while true_score > 0:
         sended_books += [books[index]]
         checked_books[books[index]] = True
-        true_value -= books_scores[books[index]]
+        true_score -= books_scores[books[index]]
         index += 1
     
     return sended_books
@@ -97,14 +116,13 @@ def process(input_file_name):
             output_file.write(" ".join(str(value) for value in solution[key]) + "\n")
 
 
-process("input\\a_example.txt") 
+input_files = [input_file_name for input_file_name in glob.glob("input\\*.txt")]
 
-process("input\\b_read_on.txt")
+init_time = time.time()
 
-process("input\\c_incunabula.txt")
+for input_file in input_files:
+    start_time = time.time()
+    process(input_file)
+    print(f"{input_file} processed in {time.time() - start_time} seconds")
 
-process("input\\d_tough_choices.txt")
-
-process("input\\e_so_many_books.txt")
-
-process("input\\f_libraries_of_the_world.txt") 
+print(f"All files processed in {time.time() - init_time} seconds")
